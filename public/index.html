@@ -69,11 +69,17 @@
     <section id="reservation">
         <h2>Забронировать столик</h2>
         <form id="pageBookingForm" class="form-container js-booking-form">
-            <div class="form-group"><label>Ваше имя</label><input type="text" name="name" required></div>
-            <div class="form-group"><label>Телефон</label><input type="tel" name="phone" required></div>
-            <div class="form-group"><label>Дата</label><input type="date" name="date" required></div>
-            <div class="form-group"><label>Время</label><input type="time" name="time" required></div>
-            <div class="form-group"><label>Гости</label><input type="number" name="guests" min="1" max="10" required></div>
+            <div class="form-group"><label>Ваше имя</label><input type="text" name="name" required=""></div>
+            <div class="form-group"><label>Телефон</label><input type="tel" name="phone" required=""></div>
+            <div class="form-group"><label>Дата</label><input type="date" name="date" required=""></div>
+            <div class="form-group"><label>Время</label><input type="time" name="time" required=""></div>
+            <div class="form-group"><label>Гости</label><input type="number" name="guests" min="1" max="10" required=""></div>
+            
+            <div style="display: flex; align-items: center; gap: 10px; font-size: 0.85rem; margin-bottom: 10px;">
+                <input type="checkbox" id="policyPage" required style="width: auto; cursor: pointer; transform: scale(1.2);">
+                <label for="policyPage" style="margin: 0; cursor: pointer; font-weight: normal;">Согласен с политикой обработки персональных данных</label>
+            </div>
+            
             <button type="submit" class="btn">Забронировать</button>
         </form>
     </section>

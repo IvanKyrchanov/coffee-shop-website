@@ -81,7 +81,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 const card = document.createElement('div');
                 card.className = 'card';
                 card.innerHTML = `<img src="${item.img}" alt="${item.title}"><div class="card-content"><h3>${item.title}</h3><p>${item.desc}</p><div class="accent-text">${item.price}</div></div>`;
-                card.addEventListener('click', () => window.openModal('resModal'));
+                
+                // Сразу открываем форму бронирования при клике на карточку
+                card.addEventListener('click', () => window.openModal('resModal')); 
+                
                 menuGrid.appendChild(card);
                 observer.observe(card);
             });
@@ -121,12 +124,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // 3. ФОРМЫ (Бронь и Обратная связь)
     // ==========================================
     const initModalsAndForms = () => {
+        // Открытие модальных окон и сброс состояния форм
         document.querySelectorAll('[data-modal]').forEach(el => {
             el.addEventListener('click', (e) => { 
                 e.preventDefault(); 
                 const modalId = el.dataset.modal;
 
-                // НОВОЕ: Возвращаем форму обратной связи в исходное состояние при открытии
+                // Возвращаем форму обратной связи в исходное состояние при открытии
                 if (modalId === 'feedbackModal') {
                     const fbContainer = document.getElementById('fbContainer');
                     const fbResult = document.getElementById('fbResult');
@@ -136,23 +140,78 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
 
+                // Возвращаем форму бронирования в исходное состояние при открытии
+                if (modalId === 'resModal') {
+                    const resContainer = document.getElementById('resFormContainer');
+                    const resResult = document.getElementById('resModalResult');
+                    if (resContainer && resResult) {
+                        resContainer.style.display = 'block';
+                        resResult.style.display = 'none';
+                    }
+                }
+
                 window.openModal(modalId); 
             });
         });
 
+        // Закрытие модальных окон
         document.querySelectorAll('.modal-overlay').forEach(m => {
-            m.addEventListener('click', (e) => { if (e.target === m || e.target.classList.contains('modal-close-x')) window.closeModal(m); });
+            m.addEventListener('click', (e) => { 
+                if (e.target === m || e.target.classList.contains('modal-close-x')) window.closeModal(m); 
+            });
         });
 
-        // Бронирование
+        // Бронирование (с маской телефона)
         document.querySelectorAll('.js-booking-form').forEach(form => {
+            
+            // 1. Находим поле телефона внутри текущей формы
+            const phoneInput = form.querySelector('input[name="phone"]');
+            
+            if (phoneInput) {
+                // Вешаем красивую маску +7 на каждое поле
+                phoneInput.addEventListener('input', (e) => {
+                    let val = e.target.value.replace(/\D/g, ''); 
+                    if (val) {
+                        if (val[0] === '7' || val[0] === '8') val = val.substring(1);
+                        let f = '+7';
+                        if (val.length > 0) f += ' (' + val.substring(0, 3);
+                        if (val.length >= 4) f += ') ' + val.substring(3, 6);
+                        if (val.length >= 7) f += '-' + val.substring(6, 8);
+                        if (val.length >= 9) f += '-' + val.substring(8, 10);
+                        e.target.value = f;
+                    } else e.target.value = '';
+                });
+            }
+
+            // 2. Отправка формы бронирования
             form.addEventListener('submit', async (e) => {
                 e.preventDefault();
+                
+                // Проверяем, чтобы номер был введен до самого конца (18 символов)
+                if (phoneInput && phoneInput.value.length > 0 && phoneInput.value.length < 18) {
+                    alert('Пожалуйста, введите номер телефона полностью.');
+                    return;
+                }
+
                 const res = await apiFetch('/api/reserve', 'POST', getFormData(form));
+                
                 if (res.ok) {
-                    form.reset(); alert(res.data.message);
-                    if (form.id === 'resModalForm') window.closeModal(document.getElementById('resModal'));
-                } else alert('Ошибка: ' + res.data.message);
+                    form.reset(); 
+                    
+                    // Если отправляли из модалки — форма внутри модалки прячется, текст появляется
+                    if (form.id === 'resModalForm') {
+                        document.getElementById('resFormContainer').style.display = 'none';
+                        document.getElementById('resModalResult').style.display = 'block';
+                    } 
+                    // Если отправляли со страницы — открываем модалку и показываем текст успеха в ней!
+                    else if (form.id === 'pageBookingForm') {
+                        window.openModal('resModal');
+                        document.getElementById('resFormContainer').style.display = 'none';
+                        document.getElementById('resModalResult').style.display = 'block';
+                    }
+                } else {
+                    alert('Ошибка: ' + res.data.message);
+                }
             });
         });
 
