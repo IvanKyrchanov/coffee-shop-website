@@ -38,6 +38,12 @@ const initDatabase = async () => {
             name TEXT, phone TEXT, date TEXT, time TEXT, guests INTEGER,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )`);
+        // Таблица обратной связи (НОВОЕ)
+        db.run(`CREATE TABLE IF NOT EXISTS feedback (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT, phone TEXT, question TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )`);
 
         // Таблица пользователей
         db.run(`CREATE TABLE IF NOT EXISTS users (
@@ -139,3 +145,14 @@ app.post('/api/reserve', (req, res) => {
 });
 
 app.listen(PORT, () => console.log(`🚀 Сервер запущен на http://localhost:${PORT}`));
+// ==========================================
+// 7. API: ОБРАТНАЯ СВЯЗЬ
+// ==========================================
+app.post('/api/feedback', (req, res) => {
+    const { name, phone, question } = req.body;
+    db.run('INSERT INTO feedback (name, phone, question) VALUES (?, ?, ?)', 
+        [name, phone, question], function(err) {
+        if (err) return res.status(500).json({ message: 'Ошибка при сохранении' });
+        res.status(201).json({ message: 'Заявка отправлена!' });
+    });
+});

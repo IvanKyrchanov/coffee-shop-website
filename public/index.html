@@ -120,14 +120,20 @@
 
     <div class="modal-overlay" id="feedbackModal">
         <div class="modal-content">
-            <span class="modal-close-x">&times;</span>
+            <span class="modal-close-x">×</span>
             <div id="fbContainer">
                 <h2 class="modal-title">Оставьте свои контакты</h2>
                 <form id="fbForm" style="display:flex; flex-direction:column; gap:15px; text-align:left;">
-                    <input type="text" id="fbName" placeholder="Имя" class="form-group input" style="padding:10px; border-radius:5px; border:1px solid #ccc" required>
-                    <input type="text" id="fbQuestion" placeholder="Ваш вопрос" maxlength="100" class="form-group input" style="padding:10px; border-radius:5px; border:1px solid #ccc" required>
-                    <input type="tel" id="fbPhone" placeholder="Телефон" class="form-group input" style="padding:10px; border-radius:5px; border:1px solid #ccc" required>
-                    <button type="submit" class="btn" id="fbBtn" disabled>Отправить</button>
+                    <input type="text" id="fbName" placeholder="Имя" class="form-group input" style="padding:10px; border-radius:5px; border:1px solid #ccc" required="">
+                    <input type="text" id="fbQuestion" placeholder="Ваш вопрос" maxlength="100" class="form-group input" style="padding:10px; border-radius:5px; border:1px solid #ccc" required="">
+                    <input type="tel" id="fbPhone" placeholder="Телефон" class="form-group input" style="padding:10px; border-radius:5px; border:1px solid #ccc" required="">
+                    
+                    <div style="display: flex; align-items: center; gap: 10px; font-size: 0.85rem;">
+                        <input type="checkbox" id="fbPolicy" required style="width: auto; cursor: pointer; transform: scale(1.2);">
+                        <label for="fbPolicy" style="margin: 0; cursor: pointer; font-weight: normal;">Согласен с политикой обработки персональных данных</label>
+                    </div>
+
+                    <button type="submit" class="btn" id="fbBtn" disabled="">Отправить</button>
                 </form>
             </div>
             <div id="fbResult" class="modal-result" style="display:none;">Менеджер скоро свяжется</div>

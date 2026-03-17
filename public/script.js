@@ -157,7 +157,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
-        // Обратная связь (с валидацией чекбокса)
+        // Обратная связь (с валидацией чекбокса и отправкой в БД)
         const fbForm = document.getElementById('fbForm');
         if (fbForm) {
             const [fbName, fbPhone, fbQuestion, fbBtn, fbPolicy] = ['fbName', 'fbPhone', 'fbQuestion', 'fbBtn', 'fbPolicy'].map(id => document.getElementById(id));
@@ -168,10 +168,27 @@ document.addEventListener('DOMContentLoaded', () => {
             };
             fbForm.addEventListener('input', validate);
             fbForm.addEventListener('change', validate);
-            fbForm.addEventListener('submit', (e) => {
+            
+            // НОВОЕ: Отправка формы обратной связи в базу данных
+            fbForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                document.getElementById('fbContainer').style.display = 'none';
-                document.getElementById('fbResult').style.display = 'block';
+                
+                const payload = {
+                    name: fbName.value.trim(),
+                    phone: fbPhone.value.trim(),
+                    question: fbQuestion.value.trim()
+                };
+
+                const res = await apiFetch('/api/feedback', 'POST', payload);
+                
+                if (res.ok) {
+                    document.getElementById('fbContainer').style.display = 'none';
+                    document.getElementById('fbResult').style.display = 'block';
+                    fbForm.reset(); 
+                    fbBtn.disabled = true; 
+                } else {
+                    alert('Ошибка при отправке: ' + res.data.message);
+                }
             });
         }
     };
