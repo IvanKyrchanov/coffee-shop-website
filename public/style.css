@@ -305,3 +305,40 @@ footer { background-color: var(--text-main); color: var(--bg-main); padding: 40p
     margin-bottom: 10px;
     font-size: 0.95rem;
 }
+/* --- 7. ПЛАШКА COOKIES --- */
+.cookie-banner {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    background-color: var(--white);
+    color: var(--text-main);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    z-index: 9999;
+    max-width: 320px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    
+    /* Начальное (скрытое) состояние */
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px); /* Слегка опущена вниз */
+    
+    /* Та самая анимация на 0.2 секунды */
+    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
+}
+
+/* Класс для показа плашки */
+.cookie-banner.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0); /* Встает на свое место */
+}
+
+.cookie-btn {
+    padding: 8px 15px;
+    font-size: 1rem;
+    align-self: flex-start; /* Кнопка прижата к левому краю */
+}

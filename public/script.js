@@ -254,9 +254,37 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
+// ==========================================
+    // 5. ПЛАШКА COOKIES
+    // ==========================================
+    const initCookies = () => {
+        const cookieBanner = document.getElementById('cookieBanner');
+        const acceptBtn = document.getElementById('acceptCookiesBtn');
+
+        if (!cookieBanner || !acceptBtn) return;
+
+        // Проверяем, нажимал ли пользователь "Окей" ранее (ищем запись в локальном хранилище браузера)
+        if (!localStorage.getItem('cookiesAccepted')) {
+            // Показываем плашку с небольшой задержкой (0.5 сек) после загрузки сайта для красоты
+            setTimeout(() => {
+                cookieBanner.classList.add('show');
+            }, 500);
+        }
+
+        // Логика нажатия на "Окей"
+        acceptBtn.addEventListener('click', () => {
+            // Убираем класс show (запустится обратная CSS анимация исчезновения)
+            cookieBanner.classList.remove('show');
+            
+            // Записываем в память браузера, что пользователь согласился
+            localStorage.setItem('cookiesAccepted', 'true');
+        });
+    };
+
     // Запускаем все модули
     initUI();
     initContent();
     initModalsAndForms();
     initAuth();
-});
+    initCookies(); // НОВОЕ: Запускаем логику Cookies
+}); // <- Это самая последняя закрывающая скобка в файле
