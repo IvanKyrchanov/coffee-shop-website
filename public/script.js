@@ -1,9 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
 
     // ==========================================
-    // УТИЛИТЫ
+    // УТИЛИТЫ И API
     // ==========================================
-    // Универсальная функция запросов
     async function apiFetch(url, method = 'GET', data = null) {
         const options = { method, headers: { 'Content-Type': 'application/json' } };
         if (data) options.body = JSON.stringify(data);
@@ -11,38 +10,18 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch(url, options);
             return { ok: response.ok, data: await response.json() };
         } catch (error) {
-            console.error(`Ошибка запроса:`, error);
-            return { ok: false, data: { message: 'Ошибка сети' } };
+            console.error(`Ошибка сети:`, error);
+            return { ok: false, data: { message: 'Ошибка соединения с сервером' } };
         }
     }
 
     const getFormData = (form) => Object.fromEntries(new FormData(form).entries());
-
-    const showMessage = (elementId, message, isSuccess) => {
-        const el = document.getElementById(elementId);
-        if (el) { el.textContent = message; el.style.color = isSuccess ? 'green' : 'red'; }
+    const showMessage = (id, msg, isSuccess) => {
+        const el = document.getElementById(id);
+        if (el) { el.textContent = msg; el.style.color = isSuccess ? 'green' : 'red'; }
     };
 
-    // ==========================================
-    // 1. ИНТЕРФЕЙС И АНИМАЦИИ
-    // ==========================================
-    const initUI = () => {
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function(e) {
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth' }); }
-            });
-        });
-
-        const scrollTopBtn = document.getElementById('scrollTopBtn');
-        if (scrollTopBtn) window.addEventListener('scroll', () => scrollTopBtn.classList.toggle('show', window.scrollY > 300));
-
-        // Открытие Лайтбокса
-        window.openModal = (id) => document.getElementById(id)?.classList.add('active');
-        window.closeModal = (modal) => { modal.classList.remove('active'); document.body.style.overflow = ''; };
-    };
-
-    // Общий IntersectionObserver для появления карточек
+    // Общий наблюдатель за скроллом (анимации)
     const observer = new IntersectionObserver((entries, obs) => {
         entries.forEach((entry, i) => {
             if (entry.isIntersecting) {
@@ -51,38 +30,50 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }, { threshold: 0.1 });
-    // --- ИСПРАВЛЕНИЕ: Настраиваем галерею (анимация + увеличение по клику) ---
-    document.querySelectorAll('.gallery-img').forEach(img => {
-        observer.observe(img); // Запускаем анимацию появления при скролле
-        
-        img.addEventListener('click', () => {
-            const lightboxImg = document.getElementById('lightboxImg');
-            if (lightboxImg) {
-                lightboxImg.src = img.src;
-                window.openModal('lightboxModal'); // Открываем лайтбокс
-            }
-        });
-    });
-    // --------------------------------------------------------------------------
 
     // ==========================================
-    // 2. ЗАГРУЗКА КОНТЕНТА (index.html)
+    // 1. ИНТЕРФЕЙС И ГАЛЕРЕЯ
+    // ==========================================
+    const initUI = () => {
+        // Скролл по якорям
+        document.querySelectorAll('a[href^="#"]').forEach(a => {
+            a.addEventListener('click', function(e) {
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth' }); }
+            });
+        });
+
+        const scrollTopBtn = document.getElementById('scrollTopBtn');
+        if (scrollTopBtn) window.addEventListener('scroll', () => scrollTopBtn.classList.toggle('show', window.scrollY > 300));
+
+        window.openModal = (id) => document.getElementById(id)?.classList.add('active');
+        window.closeModal = (m) => { m.classList.remove('active'); document.body.style.overflow = ''; };
+
+        // Галерея
+        document.querySelectorAll('.gallery-img').forEach(img => {
+            observer.observe(img);
+            img.addEventListener('click', () => {
+                const lImg = document.getElementById('lightboxImg');
+                if (lImg) { lImg.src = img.src; window.openModal('lightboxModal'); document.body.style.overflow = 'hidden';}
+            });
+        });
+    };
+
+    // ==========================================
+    // 2. ДИНАМИЧЕСКИЙ КОНТЕНТ (CMS Главной)
     // ==========================================
     const initContent = async () => {
         const heroTitle = document.getElementById('heroTitle');
-        if (!heroTitle) return; // Если не главная страница, выходим
+        if (!heroTitle) return; // Выход, если мы не на index.html
 
         const res = await apiFetch('/api/content');
         if (!res.ok || !res.data) return;
-        
         const data = res.data;
 
-        // Баннер
-        if (heroTitle && data.hero_title) heroTitle.textContent = data.hero_title;
+        if (data.hero_title) heroTitle.textContent = data.hero_title;
         const heroDesc = document.getElementById('heroDesc');
         if (heroDesc && data.hero_desc) heroDesc.textContent = data.hero_desc;
 
-        // Меню
         const menuGrid = document.getElementById('menuGrid');
         if (menuGrid && data.menu_data) {
             menuGrid.innerHTML = ''; 
@@ -90,16 +81,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 const card = document.createElement('div');
                 card.className = 'card';
                 card.innerHTML = `<img src="${item.img}" alt="${item.title}"><div class="card-content"><h3>${item.title}</h3><p>${item.desc}</p><div class="accent-text">${item.price}</div></div>`;
-                card.addEventListener('click', () => window.openModal('coffeeModal'));
+                card.addEventListener('click', () => window.openModal('resModal'));
                 menuGrid.appendChild(card);
                 observer.observe(card);
             });
         }
 
-        // Команда
         const track = document.getElementById('teamTrack');
         const pag = document.getElementById('teamPagination');
-        
         if (track && pag && data.team_data) {
             track.innerHTML = ''; pag.innerHTML = '';
             const teamFull = [...JSON.parse(data.team_data), ...JSON.parse(data.team_data)];
@@ -118,31 +107,41 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             const view = document.getElementById('teamViewport');
-            const getStep = () => track.children[0]?.offsetWidth + 20;
-            document.getElementById('teamPrev').onclick = () => view.scrollBy({ left: -getStep(), behavior: 'smooth' });
-            document.getElementById('teamNext').onclick = () => view.scrollBy({ left: getStep(), behavior: 'smooth' });
+            const step = () => track.children[0]?.offsetWidth + 20;
+            document.getElementById('teamPrev').onclick = () => view.scrollBy({ left: -step(), behavior: 'smooth' });
+            document.getElementById('teamNext').onclick = () => view.scrollBy({ left: step(), behavior: 'smooth' });
             view.addEventListener('scroll', () => {
-                const idx = Math.round(view.scrollLeft / getStep());
+                const idx = Math.round(view.scrollLeft / step());
                 document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === idx));
             });
         }
     };
 
     // ==========================================
-    // 3. ФОРМЫ И МОДАЛКИ
+    // 3. ФОРМЫ (Бронь и Обратная связь)
     // ==========================================
     const initModalsAndForms = () => {
         document.querySelectorAll('[data-modal]').forEach(el => {
-            el.addEventListener('click', (e) => { e.preventDefault(); window.openModal(el.dataset.modal); });
+            el.addEventListener('click', (e) => { 
+                e.preventDefault(); 
+                const modalId = el.dataset.modal;
+
+                // НОВОЕ: Возвращаем форму обратной связи в исходное состояние при открытии
+                if (modalId === 'feedbackModal') {
+                    const fbContainer = document.getElementById('fbContainer');
+                    const fbResult = document.getElementById('fbResult');
+                    if (fbContainer && fbResult) {
+                        fbContainer.style.display = 'block';
+                        fbResult.style.display = 'none';
+                    }
+                }
+
+                window.openModal(modalId); 
+            });
         });
 
-        document.querySelectorAll('.modal-overlay').forEach(modal => {
-            modal.addEventListener('click', (e) => { if (e.target === modal || e.target.classList.contains('modal-close-x')) window.closeModal(modal); });
-        });
-
-        document.getElementById('btnYes')?.addEventListener('click', () => {
-            window.closeModal(document.getElementById('coffeeModal'));
-            window.openModal('resModal');
+        document.querySelectorAll('.modal-overlay').forEach(m => {
+            m.addEventListener('click', (e) => { if (e.target === m || e.target.classList.contains('modal-close-x')) window.closeModal(m); });
         });
 
         // Бронирование
@@ -157,44 +156,46 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
-        // Обратная связь (с валидацией чекбокса и отправкой в БД)
+        // Обратная связь
         const fbForm = document.getElementById('fbForm');
         if (fbForm) {
             const [fbName, fbPhone, fbQuestion, fbBtn, fbPolicy] = ['fbName', 'fbPhone', 'fbQuestion', 'fbBtn', 'fbPolicy'].map(id => document.getElementById(id));
+            
+            fbPhone.addEventListener('input', (e) => {
+                let val = e.target.value.replace(/\D/g, ''); 
+                if (val) {
+                    if (val[0] === '7' || val[0] === '8') val = val.substring(1);
+                    let f = '+7';
+                    if (val.length > 0) f += ' (' + val.substring(0, 3);
+                    if (val.length >= 4) f += ') ' + val.substring(3, 6);
+                    if (val.length >= 7) f += '-' + val.substring(6, 8);
+                    if (val.length >= 9) f += '-' + val.substring(8, 10);
+                    e.target.value = f;
+                } else e.target.value = '';
+            });
+
             const validate = () => {
                 fbName.value = fbName.value.replace(/[^a-zA-Zа-яА-ЯёЁ\s]/g, '');
-                fbPhone.value = fbPhone.value.replace(/[^\d]/g, '');
-                fbBtn.disabled = !(fbName.value.trim() && fbPhone.value.trim() && fbQuestion.value.trim() && fbPolicy.checked);
+                fbBtn.disabled = !(fbName.value.trim() && fbPhone.value.length === 18 && fbQuestion.value.trim() && fbPolicy.checked);
             };
             fbForm.addEventListener('input', validate);
             fbForm.addEventListener('change', validate);
             
-            // НОВОЕ: Отправка формы обратной связи в базу данных
             fbForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                
-                const payload = {
-                    name: fbName.value.trim(),
-                    phone: fbPhone.value.trim(),
-                    question: fbQuestion.value.trim()
-                };
-
+                const payload = { name: fbName.value.trim(), phone: fbPhone.value.trim(), question: fbQuestion.value.trim() };
                 const res = await apiFetch('/api/feedback', 'POST', payload);
-                
                 if (res.ok) {
                     document.getElementById('fbContainer').style.display = 'none';
                     document.getElementById('fbResult').style.display = 'block';
-                    fbForm.reset(); 
-                    fbBtn.disabled = true; 
-                } else {
-                    alert('Ошибка при отправке: ' + res.data.message);
-                }
+                    fbForm.reset(); fbBtn.disabled = true; 
+                } else alert('Ошибка: ' + res.data.message);
             });
         }
     };
 
     // ==========================================
-    // 4. АВТОРИЗАЦИЯ (about.html)
+    // 4. АВТОРИЗАЦИЯ И ЛИЧНЫЙ КАБИНЕТ
     // ==========================================
     const initAuth = () => {
         const loginForm = document.getElementById('loginForm');
@@ -239,41 +240,34 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('logoutBtn')?.addEventListener('click', async () => {
             await apiFetch('/api/logout', 'POST');
             switchScreen(loginSec, cabSec);
-            loginForm.reset();
-            document.getElementById('loginResult').textContent = '';
+            loginForm.reset(); document.getElementById('loginResult').textContent = '';
         });
     };
 
     // ==========================================
-    // 5. COOKIES
+    // 5. COOKIES ПЛАШКА
     // ==========================================
     const initCookies = () => {
-        const cookieBanner = document.getElementById('cookieBanner');
-        const acceptBtn = document.getElementById('acceptCookiesBtn');
-        if (!cookieBanner || !acceptBtn) return;
-
-        if (!localStorage.getItem('cookiesAccepted')) setTimeout(() => cookieBanner.classList.add('show'), 500);
-        acceptBtn.addEventListener('click', () => {
-            cookieBanner.classList.remove('show');
-            localStorage.setItem('cookiesAccepted', 'true');
-        });
+        const banner = document.getElementById('cookieBanner');
+        const btn = document.getElementById('acceptCookiesBtn');
+        if (!banner || !btn) return;
+        if (!localStorage.getItem('cookiesAccepted')) setTimeout(() => banner.classList.add('show'), 500);
+        btn.addEventListener('click', () => { banner.classList.remove('show'); localStorage.setItem('cookiesAccepted', 'true'); });
     };
 
     // ==========================================
-    // 6. АДМИН-ПАНЕЛЬ (admin.html)
+    // 6. АДМИН-ПАНЕЛЬ
     // ==========================================
     const initAdmin = async () => {
         const adminPanel = document.getElementById('adminPanel');
         if (!adminPanel) return;
 
-        // Проверка авторизации
         const resAuth = await apiFetch('/api/check-auth');
         if (resAuth.ok && resAuth.data.loggedIn && resAuth.data.user.login === 'admin') {
             document.getElementById('accessDenied').style.display = 'none';
             adminPanel.style.display = 'block';
         } else return;
 
-        // Генерация DOM элементов
         window.addMenuItem = (d = {title: '', price: '', img: '', desc: ''}) => {
             document.getElementById('menuContainer').insertAdjacentHTML('beforeend', `
                 <div class="dynamic-item menu-item-node">
@@ -298,40 +292,30 @@ document.addEventListener('DOMContentLoaded', () => {
             `);
         };
 
-        // Загрузка текущих данных
         const resContent = await apiFetch('/api/content');
         if (resContent.ok) {
             document.getElementById('heroTitleInput').value = resContent.data.hero_title;
             document.getElementById('heroDescInput').value = resContent.data.hero_desc;
-            document.getElementById('menuContainer').innerHTML = '';
-            document.getElementById('teamContainer').innerHTML = '';
-            JSON.parse(resContent.data.menu_data).forEach(item => window.addMenuItem(item));
-            JSON.parse(resContent.data.team_data).forEach(item => window.addTeamItem(item));
+            document.getElementById('menuContainer').innerHTML = ''; document.getElementById('teamContainer').innerHTML = '';
+            JSON.parse(resContent.data.menu_data).forEach(i => window.addMenuItem(i));
+            JSON.parse(resContent.data.team_data).forEach(i => window.addTeamItem(i));
         }
 
-        // Сохранение
         window.saveContent = async () => {
             const btn = document.querySelector('button[onclick="saveContent()"]');
             btn.textContent = 'Сохранение...';
-            
             const payload = {
                 hero_title: document.getElementById('heroTitleInput').value,
                 hero_desc: document.getElementById('heroDescInput').value,
                 menu_data: Array.from(document.querySelectorAll('.menu-item-node')).map(n => ({ title: n.querySelector('.m-title').value, price: n.querySelector('.m-price').value, img: n.querySelector('.m-img').value, desc: n.querySelector('.m-desc').value })),
                 team_data: Array.from(document.querySelectorAll('.team-item-node')).map(n => ({ name: n.querySelector('.t-name').value, role: n.querySelector('.t-role').value, year: n.querySelector('.t-year').value, img: n.querySelector('.t-img').value }))
             };
-
             const res = await apiFetch('/api/content', 'POST', payload);
             showMessage('saveResult', res.ok ? 'Изменения сохранены! Перейдите на главную.' : 'Ошибка при сохранении.', res.ok);
             btn.textContent = '💾 Сохранить все изменения';
         };
     };
 
-    // ЗАПУСК ВСЕХ МОДУЛЕЙ
-    initUI();
-    initContent();
-    initModalsAndForms();
-    initAuth();
-    initCookies();
-    initAdmin();
+    // Запускаем всё
+    initUI(); initContent(); initModalsAndForms(); initAuth(); initCookies(); initAdmin();
 });
