@@ -1,0 +1,307 @@
+/* --- 1. CSS ПЕРЕМЕННЫЕ --- */
+:root {
+    --bg-main: #FAF3E0;
+    --bg-sec: #EADDCD;
+    --text-main: #4A3623;
+    --accent: #F27A1D;
+    --accent-hover: #d16413;
+    --white: #ffffff;
+    --overlay: rgba(0, 0, 0, 0.7);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    line-height: 1.6;
+    overflow-x: hidden; 
+}
+
+h2 {
+    text-align: center;
+    font-size: 2.5rem;
+    margin-bottom: 40px;
+}
+
+/* --- 2. УНИВЕРСАЛЬНЫЕ КНОПКИ --- */
+.btn, .top-btn {
+    color: var(--white);
+    text-decoration: none;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.2s;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.btn {
+    background-color: var(--accent);
+    padding: 15px 30px;
+    border-radius: 5px;
+    font-size: 1.1rem;
+}
+
+.btn:hover:not(:disabled) {
+    background-color: var(--accent-hover);
+}
+
+.btn:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.top-btn {
+    background-color: rgba(255, 255, 255, 0.2);
+    padding: 10px 20px;
+    border-radius: 25px;
+}
+
+.top-btn:hover, .profile-icon:hover {
+    background-color: var(--accent);
+    transform: scale(1.05);
+}
+
+/* --- 3. БЛОКИ И СЕТКИ --- */
+.hero {
+    position: relative; 
+    background: linear-gradient(var(--overlay), var(--overlay)), url('banner.png') center/cover;
+    height: 80vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: var(--bg-main);
+    padding: 0 20px;
+}
+
+.top-actions {
+    position: absolute;
+    top: 30px;
+    right: 40px;
+    display: flex;
+    gap: 15px;
+    z-index: 10;
+    flex-wrap: wrap;
+}
+
+.profile-icon {
+    width: 45px;
+    height: 45px;
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+    color: var(--bg-main);
+    text-decoration: none; /* Защита от подчеркивания ссылки */
+}
+
+.hero h1 { font-size: 4rem; margin-bottom: 20px; }
+.hero p { font-size: 1.5rem; margin-bottom: 40px; }
+.hero-buttons { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; }
+
+section { padding: 80px 10%; }
+.bg-sec { background-color: var(--bg-sec); }
+
+.grid-container {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+/* --- 4. КАРТОЧКИ (МЕНЮ И КОМАНДА) --- */
+.card {
+    background-color: var(--white);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    flex: 1;
+    min-width: 220px;
+    text-align: center;
+    cursor: pointer;
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out, box-shadow 0.2s;
+}
+
+.card.show { opacity: 1; transform: translateY(0); }
+.card.show:hover { transform: translateY(-5px); box-shadow: 0 8px 15px rgba(0,0,0,0.15); }
+.card img { width: 100%; height: 250px; object-fit: cover; }
+
+.card-content { padding: 20px; }
+.card-content h3 { font-size: 1.5rem; margin-bottom: 10px; }
+.card-content p { font-size: 0.9rem; margin-bottom: 15px; height: 40px; overflow: hidden; }
+.card-content .accent-text { font-size: 1.3rem; font-weight: bold; color: var(--accent); }
+
+/* Особенности */
+.feature-item { flex: 1; min-width: 250px; text-align: center; }
+.feature-icon { font-size: 3rem; margin-bottom: 15px; }
+
+/* Слайдер Команды */
+.team { padding: 80px 5%; position: relative; }
+.slider-container { position: relative; max-width: 1200px; margin: 0 auto; display: flex; align-items: center; }
+.slider-viewport { width: 100%; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; scroll-behavior: smooth; padding: 20px 0; }
+.slider-viewport::-webkit-scrollbar { display: none; }
+.slider-track { display: flex; gap: 20px; }
+.team-card { scroll-snap-align: center; flex: 0 0 calc(25% - 15px); }
+
+.slider-btn {
+    background-color: var(--accent);
+    color: var(--white);
+    border: none;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    cursor: pointer;
+    position: absolute;
+    z-index: 10;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    transition: background 0.3s, transform 0.2s;
+}
+.slider-btn:hover { background-color: var(--accent-hover); transform: scale(1.1); }
+.prev-btn { left: -20px; }
+.next-btn { right: -20px; }
+
+.slider-pagination { display: flex; justify-content: center; gap: 12px; margin-top: 20px; }
+.dot { width: 12px; height: 12px; background-color: #ccc; border-radius: 50%; cursor: pointer; transition: 0.3s; }
+.dot.active { background-color: var(--accent); transform: scale(1.3); }
+
+/* Галерея */
+.gallery-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+.gallery-img { width: 100%; height: 350px; object-fit: cover; border-radius: 10px; cursor: pointer; opacity: 0; transform: translateY(40px); transition: 0.6s ease-out; }
+.gallery-img.show { opacity: 1; transform: translateY(0); }
+.gallery-img.show:hover { transform: translateY(-5px); }
+
+/* Формы и Футер */
+.form-container { max-width: 600px; margin: 0 auto; background: var(--white); padding: 40px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); display: flex; flex-direction: column; gap: 20px; }
+.form-group { display: flex; flex-direction: column; text-align: left; }
+.form-group label { font-weight: bold; margin-bottom: 5px; }
+.form-group input { padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 1rem; }
+
+footer { background-color: var(--text-main); color: var(--bg-main); padding: 40px 10%; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; }
+.social-icons a { color: var(--accent); text-decoration: none; font-size: 1.5rem; margin-left: 15px; transition: color 0.3s; }
+.social-icons a:hover { color: var(--white); }
+
+/* --- 5. УНИВЕРСАЛЬНЫЕ МОДАЛЬНЫЕ ОКНА --- */
+.modal-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: var(--overlay);
+    display: flex; justify-content: center; align-items: center;
+    z-index: 1000; opacity: 0; visibility: hidden; transition: 0.2s ease;
+}
+.modal-overlay.active { opacity: 1; visibility: visible; }
+
+.modal-content {
+    background: var(--white); padding: 40px; border-radius: 10px;
+    text-align: center; max-width: 90%; min-width: 300px;
+    position: relative; transform: scale(0.9); transition: 0.2s ease;
+}
+.modal-overlay.active .modal-content { transform: scale(1); }
+
+.modal-close-x {
+    position: absolute; top: 15px; right: 20px; font-size: 28px; cursor: pointer; color: #ccc; transition: 0.2s;
+}
+.modal-close-x:hover { color: var(--accent); }
+
+/* Ограничения ширины для форм в модалках */
+#feedbackModal .modal-content, #resModal .modal-content { width: 100%; max-width: 500px; margin: 0 auto; }
+
+/* Лайтбокс */
+#lightboxModal { cursor: zoom-out; }
+.lightbox-img { max-width: 90%; max-height: 90%; border-radius: 5px; transform: scale(0.9); transition: 0.2s ease; cursor: default; }
+#lightboxModal.active .lightbox-img { transform: scale(1); }
+
+/* Кнопка Наверх */
+.scroll-to-top {
+    position: fixed; bottom: 30px; right: 30px; width: 50px; height: 50px;
+    background-color: var(--accent); color: var(--white); border-radius: 50%;
+    display: flex; justify-content: center; align-items: center; cursor: pointer;
+    z-index: 999; opacity: 0; visibility: hidden; transition: 0.3s;
+}
+.scroll-to-top.show { opacity: 1; visibility: visible; }
+.scroll-to-top:hover { background-color: var(--accent-hover); transform: translateY(-5px); }
+
+/* Адаптив */
+@media (max-width: 1024px) { .team-card { flex: 0 0 calc(33.333% - 14px); } }
+@media (max-width: 768px) { .team-card { flex: 0 0 calc(50% - 10px); } .slider-btn { display: none; } }
+@media (max-width: 480px) { .team-card { flex: 0 0 100%; } .top-actions { top: 15px; right: 15px; } }
+
+/* --- 6. СТИЛИ ЛИЧНОГО КАБИНЕТА И АВТОРИЗАЦИИ --- */
+.page-wrapper {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.auth-header {
+    padding: 20px;
+}
+
+.auth-back-btn {
+    background-color: var(--text-main);
+    color: var(--bg-main);
+}
+
+.auth-section {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px;
+}
+
+.auth-box {
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+}
+
+.auth-link {
+    display: inline-block;
+    margin-top: 15px;
+    font-weight: bold;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.link-accent { color: var(--accent); }
+.link-dark { color: var(--text-main); }
+
+.cabinet-card {
+    width: 100%;
+    max-width: 500px;
+    text-align: center;
+}
+
+.points-display {
+    font-size: 2.5rem;
+    color: var(--accent);
+    display: block;
+    margin: 10px 0 20px;
+}
+
+.cabinet-info {
+    text-align: left;
+    padding: 30px;
+}
+
+.cabinet-info p {
+    margin-bottom: 10px;
+    font-size: 0.95rem;
+}

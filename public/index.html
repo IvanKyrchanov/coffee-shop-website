@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Кофейня «Утренний заряд»</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header class="hero" id="hero">
+        <div class="top-actions">
+            <button class="top-btn" data-modal="feedbackModal">Обратная связь</button>
+            <a href="#footer" class="top-btn">Контакты</a>
+            <a href="/about.html" class="profile-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+            </a>
+        </div>
+        <h1>Лучший кофе в твоём районе</h1>
+        <p>Свежая обжарка каждый день. Зарядись с первого глотка.</p>
+        <div class="hero-buttons">
+            <a href="#menu" class="btn">Посмотреть меню</a>
+            <a href="#reservation" class="btn">Забронировать столик</a>
+        </div>
+    </header>
+
+    <section id="menu">
+        <h2>Наше меню</h2>
+        <div class="grid-container">
+            <div class="card" data-modal="coffeeModal">
+                <img src="https://images.unsplash.com/photo-1534778101976-62847782c213?q=80&w=500&auto=format&fit=crop" alt="Капучино">
+                <div class="card-content">
+                    <h3>Капучино</h3><p>Идеальный баланс эспрессо и нежной молочной пены.</p><div class="accent-text">250 ₽</div>
+                </div>
+            </div>
+            <div class="card" data-modal="coffeeModal">
+                <img src="https://images.unsplash.com/photo-1599398054066-846f28917f38?q=80&w=500&auto=format&fit=crop" alt="Латте">
+                <div class="card-content">
+                    <h3>Латте</h3><p>Мягкий кофейный напиток с большим количеством молока.</p><div class="accent-text">270 ₽</div>
+                </div>
+            </div>
+            <div class="card" data-modal="coffeeModal">
+                <img src="https://images.unsplash.com/photo-1510591509098-f4fdc6d0ff04?q=80&w=500&auto=format&fit=crop" alt="Эспрессо">
+                <div class="card-content">
+                    <h3>Эспрессо</h3><p>Чистый и насыщенный вкус для истинных ценителей.</p><div class="accent-text">150 ₽</div>
+                </div>
+            </div>
+            <div class="card" data-modal="coffeeModal">
+                <img src="https://images.unsplash.com/photo-1585494156145-1c60a4fe952b?q=80&w=500&auto=format&fit=crop" alt="Раф">
+                <div class="card-content">
+                    <h3>Раф</h3><p>Сливочный, сладкий и невероятно мягкий кофейный десерт.</p><div class="accent-text">320 ₽</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="bg-sec">
+        <h2>Почему мы</h2>
+        <div class="grid-container">
+            <div class="feature-item"><div class="feature-icon">🌍</div><h3>Зёрна из Эфиопии</h3><p>Только 100% арабика спешелти класса.</p></div>
+            <div class="feature-item"><div class="feature-icon">🔥</div><h3>Собственная обжарка</h3><p>Раскрываем профиль каждого зерна.</p></div>
+            <div class="feature-item"><div class="feature-icon">🛵</div><h3>Бесплатная доставка</h3><p>Бесплатно привезем заказы от 500 рублей.</p></div>
+        </div>
+    </section>
+
+    <section id="team" class="team">
+        <h2>Наша команда</h2>
+        <div class="slider-container">
+            <button class="slider-btn prev-btn" id="teamPrev">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18L9 12L15 6"/></svg>
+            </button>
+            <div class="slider-viewport" id="teamViewport"><div class="slider-track" id="teamTrack"></div></div>
+            <button class="slider-btn next-btn" id="teamNext">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18L15 12L9 6"/></svg>
+            </button>
+        </div>
+        <div class="slider-pagination" id="teamPagination"></div>
+    </section>
+
+    <section class="gallery bg-sec">
+        <h2>Атмосфера кофейни</h2>
+        <div class="gallery-grid">
+            <img src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?q=60&w=800&auto=format&fit=crop" class="gallery-img" alt="Интерьер 1">
+            <img src="https://images.unsplash.com/photo-1445116572660-236099ec97a0?q=60&w=800&auto=format&fit=crop" class="gallery-img" alt="Интерьер 2">
+            <img src="https://images.unsplash.com/photo-1525193612562-0ec53b0e5d7c?q=60&w=800&auto=format&fit=crop" class="gallery-img" alt="Интерьер 3">
+            <img src="https://images.unsplash.com/photo-1600093463592-8e36ae95ef56?q=60&w=800&auto=format&fit=crop" class="gallery-img" alt="Интерьер 4">
+        </div>
+    </section>
+
+    <section id="reservation">
+        <h2>Забронировать столик</h2>
+        <form id="pageBookingForm" class="form-container js-booking-form">
+            <div class="form-group"><label>Ваше имя</label><input type="text" name="name" required></div>
+            <div class="form-group"><label>Телефон</label><input type="tel" name="phone" required></div>
+            <div class="form-group"><label>Дата</label><input type="date" name="date" required></div>
+            <div class="form-group"><label>Время</label><input type="time" name="time" required></div>
+            <div class="form-group"><label>Гости</label><input type="number" name="guests" min="1" max="10" required></div>
+            <button type="submit" class="btn">Забронировать</button>
+        </form>
+    </section>
+
+    <footer id="footer">
+        <div class="footer-info">
+            <p><strong>Адрес:</strong> ул. Кофейная, д. 15</p>
+            <p><strong>Время работы:</strong> Пн-Вс, 08:00 - 22:00</p>
+            <p><strong>Телефон:</strong> +7 (999) 123-45-67</p>
+        </div>
+        <div class="social-icons">
+            <a href="#">VK</a><a href="#">TG</a><a href="#">IG</a>
+        </div>
+    </footer>
+
+    <div class="modal-overlay" id="coffeeModal">
+        <div class="modal-content">
+            <h2 class="modal-title" id="coffeeTitle">Хочешь кофе?</h2>
+            <div style="display:flex; justify-content:center; gap:15px;" id="coffeeBtns">
+                <button class="btn" id="btnYes">Да</button>
+                <button class="btn" id="btnNo">Нет</button>
+            </div>
+            <div class="modal-result" id="coffeeResult" style="display:none;"></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="resModal">
+        <div class="modal-content">
+            <span class="modal-close-x">&times;</span>
+            <div id="resFormContainer">
+                <h2 class="modal-title">Забронировать столик</h2>
+                <form id="resModalForm" class="js-booking-form" style="display: flex; flex-direction: column; gap: 15px; text-align: left;">
+                    <div class="form-group"><label>Ваше имя</label><input type="text" name="name" required></div>
+                    <div class="form-group"><label>Телефон</label><input type="tel" name="phone" required></div>
+                    <div class="form-group"><label>Дата</label><input type="date" name="date" required></div>
+                    <div class="form-group"><label>Время</label><input type="time" name="time" required></div>
+                    <div class="form-group"><label>Гости</label><input type="number" name="guests" min="1" max="10" required></div>
+                    <button type="submit" class="btn">Забронировать</button>
+                </form>
+            </div>
+            <div id="resModalResult" class="modal-result" style="display:none;">Столик успешно забронирован!</div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="feedbackModal">
+        <div class="modal-content">
+            <span class="modal-close-x">&times;</span>
+            <div id="fbContainer">
+                <h2 class="modal-title">Оставьте свои контакты</h2>
+                <form id="fbForm" style="display:flex; flex-direction:column; gap:15px; text-align:left;">
+                    <input type="text" id="fbName" placeholder="Имя" class="form-group input" style="padding:10px; border-radius:5px; border:1px solid #ccc" required>
+                    <input type="text" id="fbQuestion" placeholder="Ваш вопрос" maxlength="100" class="form-group input" style="padding:10px; border-radius:5px; border:1px solid #ccc" required>
+                    <input type="tel" id="fbPhone" placeholder="Телефон" class="form-group input" style="padding:10px; border-radius:5px; border:1px solid #ccc" required>
+                    <button type="submit" class="btn" id="fbBtn" disabled>Отправить</button>
+                </form>
+            </div>
+            <div id="fbResult" class="modal-result" style="display:none;">Менеджер скоро свяжется</div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="lightboxModal">
+        <span class="modal-close-x" style="top:30px; right:40px; font-size:40px; color:#fff;">&times;</span>
+        <img src="" class="lightbox-img" id="lightboxImg">
+    </div>
+
+    <a href="#hero" class="scroll-to-top" id="scrollTopBtn">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor"><path d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8-8 8z"/></svg>
+    </a>
+
+    <script src="script.js"></script>
+</body>
+</html>

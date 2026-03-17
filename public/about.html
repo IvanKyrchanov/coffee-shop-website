@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Личный кабинет - Кофейня «Утренний заряд»</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="page-wrapper">
+
+    <header class="auth-header">
+        <a href="/" class="top-btn auth-back-btn">&larr; На главную</a>
+    </header>
+
+    <section class="auth-section">
+        
+        <div id="loginSection" class="auth-box">
+            <h2>Вход в аккаунт</h2>
+            <form id="loginForm" class="form-container">
+                <div class="form-group"><label>Логин</label><input type="text" name="login" required></div>
+                <div class="form-group"><label>Пароль</label><input type="password" name="password" required></div>
+                <button type="submit" class="btn" style="margin-top: 10px;">Войти</button>
+                <div id="loginResult" style="margin-top: 15px; font-weight: bold;"></div>
+                <a href="#" id="showRegisterBtn" class="auth-link link-accent" style="display: none;">Зарегистрироваться</a>
+            </form>
+        </div>
+
+        <div id="registerSection" class="auth-box" style="display: none;">
+            <h2>Регистрация</h2>
+            <form id="registerForm" class="form-container">
+                <div class="form-group"><label>Логин</label><input type="text" name="login" required></div>
+                <div class="form-group"><label>Пароль</label><input type="password" name="password" required></div>
+                <button type="submit" class="btn" style="margin-top: 10px;">Создать аккаунт</button>
+                <div id="registerResult" style="margin-top: 15px; font-weight: bold;"></div>
+                <a href="#" id="showLoginBtn" class="auth-link link-dark">Уже есть аккаунт? Войти</a>
+            </form>
+        </div>
+
+        <div id="cabinetSection" class="cabinet-card" style="display: none;">
+            <h2>Личный кабинет: <span id="cabUsername" style="color: var(--accent);"></span></h2>
+            
+            <div class="form-container cabinet-info">
+                <h3 style="text-align: center;">Бонусные баллы: <span id="cabPoints" class="points-display">0</span></h3>
+                
+                <h4>Как получить баллы?</h4>
+                <p>☕ <b>Покупка кофе:</b> Кэшбек 10% от суммы заказа.</p>
+                <p>🍰 <b>Отзывы:</b> 50 баллов за отзыв на Яндекс.Картах.</p>
+                <p style="color: #666;"><i>*Баллами можно оплатить до 50% чека.</i></p>
+
+                <div style="text-align: center; margin-top: 20px;">
+                    <button id="logoutBtn" class="btn" style="background-color: #ddd; color: #333;">Выйти из аккаунта</button>
+                </div>
+            </div>
+        </div>
+
+    </section>
+
+    <script src="script.js"></script>
+</body>
+</html>
