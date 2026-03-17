@@ -3,16 +3,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
     // УТИЛИТЫ
     // ==========================================
-    async function sendRequest(url, data = null, method = 'POST') {
+    // Универсальная функция запросов
+    async function apiFetch(url, method = 'GET', data = null) {
         const options = { method, headers: { 'Content-Type': 'application/json' } };
         if (data) options.body = JSON.stringify(data);
         try {
             const response = await fetch(url, options);
-            const result = await response.json();
-            return { ok: response.ok, data: result };
+            return { ok: response.ok, data: await response.json() };
         } catch (error) {
             console.error(`Ошибка запроса:`, error);
-            return { ok: false, data: { message: 'Ошибка связи с сервером' } };
+            return { ok: false, data: { message: 'Ошибка сети' } };
         }
     }
 
@@ -20,108 +20,105 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const showMessage = (elementId, message, isSuccess) => {
         const el = document.getElementById(elementId);
-        if (!el) return;
-        el.textContent = message;
-        el.style.color = isSuccess ? 'green' : 'red';
+        if (el) { el.textContent = message; el.style.color = isSuccess ? 'green' : 'red'; }
     };
 
     // ==========================================
-    // 1. НАВИГАЦИЯ И АНИМАЦИИ ПОЯВЛЕНИЯ
+    // 1. ИНТЕРФЕЙС И АНИМАЦИИ
     // ==========================================
     const initUI = () => {
-        // Плавный скролл
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function(e) {
                 const target = document.querySelector(this.getAttribute('href'));
-                if (!target) return;
-                e.preventDefault();
-                target.scrollIntoView({ behavior: 'smooth' });
+                if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth' }); }
             });
         });
 
-        // Кнопка наверх
         const scrollTopBtn = document.getElementById('scrollTopBtn');
-        if (scrollTopBtn) {
-            window.addEventListener('scroll', () => {
-                scrollTopBtn.classList.toggle('show', window.scrollY > 300);
+        if (scrollTopBtn) window.addEventListener('scroll', () => scrollTopBtn.classList.toggle('show', window.scrollY > 300));
+
+        // Открытие Лайтбокса
+        window.openModal = (id) => document.getElementById(id)?.classList.add('active');
+        window.closeModal = (modal) => { modal.classList.remove('active'); document.body.style.overflow = ''; };
+    };
+
+    // Общий IntersectionObserver для появления карточек
+    const observer = new IntersectionObserver((entries, obs) => {
+        entries.forEach((entry, i) => {
+            if (entry.isIntersecting) {
+                setTimeout(() => entry.target.classList.add('show'), i * 100);
+                obs.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.1 });
+    // --- ИСПРАВЛЕНИЕ: Настраиваем галерею (анимация + увеличение по клику) ---
+    document.querySelectorAll('.gallery-img').forEach(img => {
+        observer.observe(img); // Запускаем анимацию появления при скролле
+        
+        img.addEventListener('click', () => {
+            const lightboxImg = document.getElementById('lightboxImg');
+            if (lightboxImg) {
+                lightboxImg.src = img.src;
+                window.openModal('lightboxModal'); // Открываем лайтбокс
+            }
+        });
+    });
+    // --------------------------------------------------------------------------
+
+    // ==========================================
+    // 2. ЗАГРУЗКА КОНТЕНТА (index.html)
+    // ==========================================
+    const initContent = async () => {
+        const heroTitle = document.getElementById('heroTitle');
+        if (!heroTitle) return; // Если не главная страница, выходим
+
+        const res = await apiFetch('/api/content');
+        if (!res.ok || !res.data) return;
+        
+        const data = res.data;
+
+        // Баннер
+        if (heroTitle && data.hero_title) heroTitle.textContent = data.hero_title;
+        const heroDesc = document.getElementById('heroDesc');
+        if (heroDesc && data.hero_desc) heroDesc.textContent = data.hero_desc;
+
+        // Меню
+        const menuGrid = document.getElementById('menuGrid');
+        if (menuGrid && data.menu_data) {
+            menuGrid.innerHTML = ''; 
+            JSON.parse(data.menu_data).forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `<img src="${item.img}" alt="${item.title}"><div class="card-content"><h3>${item.title}</h3><p>${item.desc}</p><div class="accent-text">${item.price}</div></div>`;
+                card.addEventListener('click', () => window.openModal('coffeeModal'));
+                menuGrid.appendChild(card);
+                observer.observe(card);
             });
         }
 
-        // ВОЗВРАЩЕНО: Анимация при скролле (делает карточки видимыми)
-        const observer = new IntersectionObserver((entries, obs) => {
-            entries.forEach((entry, i) => {
-                if (entry.isIntersecting) {
-                    setTimeout(() => entry.target.classList.add('show'), i * 100);
-                    obs.unobserve(entry.target);
-                }
-            });
-        }, { threshold: 0.1 });
-        document.querySelectorAll('.card, .gallery-img').forEach(el => observer.observe(el));
-    };
-
-    // ==========================================
-    // 2. ГЕНЕРАЦИЯ КОМАНДЫ И ГАЛЕРЕЯ
-    // ==========================================
-    const initContent = () => {
-        // ВОЗВРАЩЕНО: Лайтбокс (увеличение картинок)
-        const openModal = (id) => document.getElementById(id)?.classList.add('active');
-        document.querySelectorAll('.gallery-img').forEach(img => {
-            img.addEventListener('click', () => {
-                const lightboxImg = document.getElementById('lightboxImg');
-                if (lightboxImg) {
-                    lightboxImg.src = img.src;
-                    openModal('lightboxModal');
-                    document.body.style.overflow = 'hidden';
-                }
-            });
-        });
-
-        // ВОЗВРАЩЕНО: Генерация слайдера команды
+        // Команда
         const track = document.getElementById('teamTrack');
         const pag = document.getElementById('teamPagination');
         
-        if (track && pag) {
-            const teamBase = [
-                {n: 'Анна', r: 'Шеф-бариста', y: 2018, i: '1534528741775-53994a69daeb'},
-                {n: 'Максим', r: 'Ростермейстер', y: 2019, i: '1506794778202-cad84cf45f1d'},
-                {n: 'Мария', r: 'Кондитер', y: 2021, i: '1544005313-94ddf0286df2'},
-                {n: 'Алексей', r: 'Управляющий', y: 2020, i: '1507003211169-0a1dd7228f2d'},
-                {n: 'Катя', r: 'Бариста', y: 2022, i: '1517841905240-472988babdf9'},
-                {n: 'Дмитрий', r: 'Бариста', y: 2023, i: '1539571696357-5a69c17a67c6'},
-                {n: 'Сергей', r: 'Бариста', y: 2023, i: '1519085360753-af0119f7cbe7'},
-                {n: 'Ольга', r: 'Пом. кондитера', y: 2021, i: '1531746020798-e6953c6e8e04'},
-                {n: 'Иван', r: 'Бариста', y: 2022, i: '1527980965255-d3b416303d12'},
-                {n: 'Света', r: 'Кассир', y: 2021, i: '1438761681033-6461ffad8d80'}
-            ];
-            const teamFull = [...teamBase, ...teamBase]; 
+        if (track && pag && data.team_data) {
+            track.innerHTML = ''; pag.innerHTML = '';
+            const teamFull = [...JSON.parse(data.team_data), ...JSON.parse(data.team_data)];
 
             teamFull.forEach((mbr, i) => {
-                track.insertAdjacentHTML('beforeend', `
-                    <div class="card team-card">
-                        <img src="https://images.unsplash.com/photo-${mbr.i}?q=80&w=400&auto=format&fit=crop" alt="${mbr.n}">
-                        <div class="card-content"><h3>${mbr.n}</h3><p>${mbr.r}</p><div class="accent-text">С ${mbr.y} г.</div></div>
-                    </div>
-                `);
+                const card = document.createElement('div');
+                card.className = 'card team-card';
+                card.innerHTML = `<img src="${mbr.img}" alt="${mbr.name}"><div class="card-content"><h3>${mbr.name}</h3><p>${mbr.role}</p><div class="accent-text">С ${mbr.year} г.</div></div>`;
+                track.appendChild(card);
+                observer.observe(card);
+
                 const dot = document.createElement('div');
-                dot.className = `dot ${i===0 ? 'active':''}`;
+                dot.className = `dot ${i === 0 ? 'active' : ''}`;
                 dot.onclick = () => document.getElementById('teamViewport').scrollTo({ left: i * (track.children[0].offsetWidth + 20), behavior: 'smooth' });
                 pag.appendChild(dot);
             });
 
-            // Наблюдатель для новых карточек команды
-            const observer = new IntersectionObserver((entries, obs) => {
-                entries.forEach((entry, i) => {
-                    if (entry.isIntersecting) {
-                        setTimeout(() => entry.target.classList.add('show'), i * 100);
-                        obs.unobserve(entry.target);
-                    }
-                });
-            }, { threshold: 0.1 });
-            track.querySelectorAll('.card').forEach(el => observer.observe(el));
-
-            // Логика стрелок слайдера
             const view = document.getElementById('teamViewport');
-            const getStep = () => track.children[0].offsetWidth + 20;
+            const getStep = () => track.children[0]?.offsetWidth + 20;
             document.getElementById('teamPrev').onclick = () => view.scrollBy({ left: -getStep(), behavior: 'smooth' });
             document.getElementById('teamNext').onclick = () => view.scrollBy({ left: getStep(), behavior: 'smooth' });
             view.addEventListener('scroll', () => {
@@ -132,58 +129,45 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // ==========================================
-    // 3. МОДАЛЬНЫЕ ОКНА И ФОРМЫ
+    // 3. ФОРМЫ И МОДАЛКИ
     // ==========================================
     const initModalsAndForms = () => {
-        const openModal = (id) => document.getElementById(id)?.classList.add('active');
-        const closeModal = (modal) => { modal.classList.remove('active'); document.body.style.overflow = ''; };
-
         document.querySelectorAll('[data-modal]').forEach(el => {
-            el.addEventListener('click', (e) => {
-                e.preventDefault();
-                openModal(el.dataset.modal);
-            });
+            el.addEventListener('click', (e) => { e.preventDefault(); window.openModal(el.dataset.modal); });
         });
 
         document.querySelectorAll('.modal-overlay').forEach(modal => {
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal || e.target.classList.contains('modal-close-x')) closeModal(modal);
-            });
+            modal.addEventListener('click', (e) => { if (e.target === modal || e.target.classList.contains('modal-close-x')) window.closeModal(modal); });
         });
 
         document.getElementById('btnYes')?.addEventListener('click', () => {
-            closeModal(document.getElementById('coffeeModal'));
-            openModal('resModal');
+            window.closeModal(document.getElementById('coffeeModal'));
+            window.openModal('resModal');
         });
 
+        // Бронирование
         document.querySelectorAll('.js-booking-form').forEach(form => {
             form.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                const res = await sendRequest('/api/reserve', getFormData(form));
+                const res = await apiFetch('/api/reserve', 'POST', getFormData(form));
                 if (res.ok) {
-                    form.reset();
-                    alert(res.data.message || 'Столик забронирован!');
-                    if (form.id === 'resModalForm') closeModal(document.getElementById('resModal'));
-                } else {
-                    alert('Ошибка: ' + res.data.message);
-                }
+                    form.reset(); alert(res.data.message);
+                    if (form.id === 'resModalForm') window.closeModal(document.getElementById('resModal'));
+                } else alert('Ошибка: ' + res.data.message);
             });
         });
 
-        // ВОЗВРАЩЕНО: Логика формы "Обратная связь"
+        // Обратная связь (с валидацией чекбокса)
         const fbForm = document.getElementById('fbForm');
         if (fbForm) {
-            const fbName = document.getElementById('fbName');
-            const fbPhone = document.getElementById('fbPhone');
-            const fbQuestion = document.getElementById('fbQuestion');
-            const fbBtn = document.getElementById('fbBtn');
-
-            fbForm.addEventListener('input', () => {
+            const [fbName, fbPhone, fbQuestion, fbBtn, fbPolicy] = ['fbName', 'fbPhone', 'fbQuestion', 'fbBtn', 'fbPolicy'].map(id => document.getElementById(id));
+            const validate = () => {
                 fbName.value = fbName.value.replace(/[^a-zA-Zа-яА-ЯёЁ\s]/g, '');
                 fbPhone.value = fbPhone.value.replace(/[^\d]/g, '');
-                fbBtn.disabled = !(fbName.value.trim() && fbPhone.value.trim() && fbQuestion.value.trim());
-            });
-            
+                fbBtn.disabled = !(fbName.value.trim() && fbPhone.value.trim() && fbQuestion.value.trim() && fbPolicy.checked);
+            };
+            fbForm.addEventListener('input', validate);
+            fbForm.addEventListener('change', validate);
             fbForm.addEventListener('submit', (e) => {
                 e.preventDefault();
                 document.getElementById('fbContainer').style.display = 'none';
@@ -193,37 +177,31 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // ==========================================
-    // 4. АВТОРИЗАЦИЯ И ЛИЧНЫЙ КАБИНЕТ (about.html)
+    // 4. АВТОРИЗАЦИЯ (about.html)
     // ==========================================
     const initAuth = () => {
-        const [loginSec, regSec, cabSec] = ['loginSection', 'registerSection', 'cabinetSection'].map(id => document.getElementById(id));
-        const [loginForm, regForm] = [document.getElementById('loginForm'), document.getElementById('registerForm')];
-        
-        if (!loginForm || !regForm) return;
+        const loginForm = document.getElementById('loginForm');
+        if (!loginForm) return;
 
-        const switchScreen = (showSec, hideSec) => {
-            hideSec.style.display = 'none';
-            showSec.style.display = 'block';
-        };
+        const [loginSec, regSec, cabSec] = ['loginSection', 'registerSection', 'cabinetSection'].map(id => document.getElementById(id));
+        const switchScreen = (showSec, hideSec) => { hideSec.style.display = 'none'; showSec.style.display = 'block'; };
 
         document.getElementById('showRegisterBtn').onclick = (e) => { e.preventDefault(); switchScreen(regSec, loginSec); };
         document.getElementById('showLoginBtn').onclick = (e) => { e.preventDefault(); switchScreen(loginSec, regSec); };
 
-        const checkAuth = async () => {
-            const res = await sendRequest('/api/check-auth', null, 'GET');
+        const checkSession = async () => {
+            const res = await apiFetch('/api/check-auth');
             if (res.ok && res.data.loggedIn) {
-                switchScreen(cabSec, loginSec);
-                regSec.style.display = 'none';
+                switchScreen(cabSec, loginSec); regSec.style.display = 'none';
                 document.getElementById('cabUsername').textContent = res.data.user.login;
                 document.getElementById('cabPoints').textContent = res.data.user.bonus_points;
             }
         };
-        checkAuth();
+        checkSession();
 
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const res = await sendRequest('/api/login', getFormData(loginForm));
-            
+            const res = await apiFetch('/api/login', 'POST', getFormData(loginForm));
             if (res.ok) {
                 switchScreen(cabSec, loginSec);
                 document.getElementById('cabUsername').textContent = res.data.user.login;
@@ -234,57 +212,109 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        regForm.addEventListener('submit', async (e) => {
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const res = await sendRequest('/api/register', getFormData(regForm));
-            
-            if (res.ok) {
-                showMessage('registerResult', res.data.message, true);
-                regForm.reset();
-            } else {
-                showMessage('registerResult', res.data.message, false);
-            }
+            const res = await apiFetch('/api/register', 'POST', getFormData(e.target));
+            showMessage('registerResult', res.data.message, res.ok);
+            if(res.ok) e.target.reset();
         });
 
         document.getElementById('logoutBtn')?.addEventListener('click', async () => {
-            await sendRequest('/api/logout');
+            await apiFetch('/api/logout', 'POST');
             switchScreen(loginSec, cabSec);
             loginForm.reset();
             document.getElementById('loginResult').textContent = '';
         });
     };
 
-// ==========================================
-    // 5. ПЛАШКА COOKIES
+    // ==========================================
+    // 5. COOKIES
     // ==========================================
     const initCookies = () => {
         const cookieBanner = document.getElementById('cookieBanner');
         const acceptBtn = document.getElementById('acceptCookiesBtn');
-
         if (!cookieBanner || !acceptBtn) return;
 
-        // Проверяем, нажимал ли пользователь "Окей" ранее (ищем запись в локальном хранилище браузера)
-        if (!localStorage.getItem('cookiesAccepted')) {
-            // Показываем плашку с небольшой задержкой (0.5 сек) после загрузки сайта для красоты
-            setTimeout(() => {
-                cookieBanner.classList.add('show');
-            }, 500);
-        }
-
-        // Логика нажатия на "Окей"
+        if (!localStorage.getItem('cookiesAccepted')) setTimeout(() => cookieBanner.classList.add('show'), 500);
         acceptBtn.addEventListener('click', () => {
-            // Убираем класс show (запустится обратная CSS анимация исчезновения)
             cookieBanner.classList.remove('show');
-            
-            // Записываем в память браузера, что пользователь согласился
             localStorage.setItem('cookiesAccepted', 'true');
         });
     };
 
-    // Запускаем все модули
+    // ==========================================
+    // 6. АДМИН-ПАНЕЛЬ (admin.html)
+    // ==========================================
+    const initAdmin = async () => {
+        const adminPanel = document.getElementById('adminPanel');
+        if (!adminPanel) return;
+
+        // Проверка авторизации
+        const resAuth = await apiFetch('/api/check-auth');
+        if (resAuth.ok && resAuth.data.loggedIn && resAuth.data.user.login === 'admin') {
+            document.getElementById('accessDenied').style.display = 'none';
+            adminPanel.style.display = 'block';
+        } else return;
+
+        // Генерация DOM элементов
+        window.addMenuItem = (d = {title: '', price: '', img: '', desc: ''}) => {
+            document.getElementById('menuContainer').insertAdjacentHTML('beforeend', `
+                <div class="dynamic-item menu-item-node">
+                    <button class="btn-remove" onclick="this.parentElement.remove()">Удалить</button>
+                    <input type="text" placeholder="Название" class="m-title" value="${d.title}">
+                    <input type="text" placeholder="Цена" class="m-price" value="${d.price}">
+                    <input type="text" placeholder="Ссылка на картинку" class="m-img" value="${d.img}" style="grid-column: span 2;">
+                    <textarea placeholder="Описание" class="m-desc">${d.desc}</textarea>
+                </div>
+            `);
+        };
+
+        window.addTeamItem = (d = {name: '', role: '', year: '', img: ''}) => {
+            document.getElementById('teamContainer').insertAdjacentHTML('beforeend', `
+                <div class="dynamic-item team-item-node">
+                    <button class="btn-remove" onclick="this.parentElement.remove()">Удалить</button>
+                    <input type="text" placeholder="Имя" class="t-name" value="${d.name}">
+                    <input type="text" placeholder="Должность" class="t-role" value="${d.role}">
+                    <input type="text" placeholder="Год" class="t-year" value="${d.year}">
+                    <input type="text" placeholder="Ссылка на фото" class="t-img" value="${d.img}">
+                </div>
+            `);
+        };
+
+        // Загрузка текущих данных
+        const resContent = await apiFetch('/api/content');
+        if (resContent.ok) {
+            document.getElementById('heroTitleInput').value = resContent.data.hero_title;
+            document.getElementById('heroDescInput').value = resContent.data.hero_desc;
+            document.getElementById('menuContainer').innerHTML = '';
+            document.getElementById('teamContainer').innerHTML = '';
+            JSON.parse(resContent.data.menu_data).forEach(item => window.addMenuItem(item));
+            JSON.parse(resContent.data.team_data).forEach(item => window.addTeamItem(item));
+        }
+
+        // Сохранение
+        window.saveContent = async () => {
+            const btn = document.querySelector('button[onclick="saveContent()"]');
+            btn.textContent = 'Сохранение...';
+            
+            const payload = {
+                hero_title: document.getElementById('heroTitleInput').value,
+                hero_desc: document.getElementById('heroDescInput').value,
+                menu_data: Array.from(document.querySelectorAll('.menu-item-node')).map(n => ({ title: n.querySelector('.m-title').value, price: n.querySelector('.m-price').value, img: n.querySelector('.m-img').value, desc: n.querySelector('.m-desc').value })),
+                team_data: Array.from(document.querySelectorAll('.team-item-node')).map(n => ({ name: n.querySelector('.t-name').value, role: n.querySelector('.t-role').value, year: n.querySelector('.t-year').value, img: n.querySelector('.t-img').value }))
+            };
+
+            const res = await apiFetch('/api/content', 'POST', payload);
+            showMessage('saveResult', res.ok ? 'Изменения сохранены! Перейдите на главную.' : 'Ошибка при сохранении.', res.ok);
+            btn.textContent = '💾 Сохранить все изменения';
+        };
+    };
+
+    // ЗАПУСК ВСЕХ МОДУЛЕЙ
     initUI();
     initContent();
     initModalsAndForms();
     initAuth();
-    initCookies(); // НОВОЕ: Запускаем логику Cookies
-}); // <- Это самая последняя закрывающая скобка в файле
+    initCookies();
+    initAdmin();
+});
