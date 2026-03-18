@@ -92,9 +92,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const track = document.getElementById('teamTrack');
         const pag = document.getElementById('teamPagination');
+        
         if (track && pag && data.team_data) {
             track.innerHTML = ''; pag.innerHTML = '';
-            const teamFull = [...JSON.parse(data.team_data), ...JSON.parse(data.team_data)];
+            
+            // 1. Убрали дублирование массива
+            const teamFull = JSON.parse(data.team_data);
 
             teamFull.forEach((mbr, i) => {
                 const card = document.createElement('div');
@@ -105,19 +108,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const dot = document.createElement('div');
                 dot.className = `dot ${i === 0 ? 'active' : ''}`;
-                // НОВОЕ: меняем teamViewport на teamTrack
                 dot.onclick = () => document.getElementById('teamTrack').scrollTo({ left: i * (track.children[0].offsetWidth + 20), behavior: 'smooth' });
                 pag.appendChild(dot);
             });
 
-            // НОВОЕ: меняем teamViewport на teamTrack
             const view = document.getElementById('teamTrack');
             const step = () => track.children[0]?.offsetWidth + 20;
             document.getElementById('teamPrev').onclick = () => view.scrollBy({ left: -step(), behavior: 'smooth' });
             document.getElementById('teamNext').onclick = () => view.scrollBy({ left: step(), behavior: 'smooth' });
+            
+            // 2. Добавили задержку для снижения нагрузки на телефон
+            let isScrolling;
             view.addEventListener('scroll', () => {
-                const idx = Math.round(view.scrollLeft / step());
-                document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === idx));
+                window.clearTimeout(isScrolling);
+                isScrolling = setTimeout(() => {
+                    const idx = Math.round(view.scrollLeft / step());
+                    document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === idx));
+                }, 50); 
             });
         }
     };

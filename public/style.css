@@ -151,18 +151,18 @@ section { padding: 80px 10%; }
 
 /* --- 6. СЛАЙДЕР КОМАНДЫ --- */
 .slider-container { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; gap: 20px; }
-.slider-viewport { width: 100%; overflow: hidden; } /* Теперь это просто маска */
+.slider-viewport { width: 100%; overflow: hidden; } 
 .slider-track { 
     display: flex; 
     gap: 20px; 
     padding: 20px 0; 
-    overflow-x: auto; /* Перенесли скролл сюда */
-    scroll-snap-type: x mandatory; /* Теперь магнит работает! */
+    overflow-x: auto; 
+    /* УБРАЛИ scroll-snap-type, теперь это плавная свободная прокрутка */
     scrollbar-width: none; 
     -webkit-overflow-scrolling: touch; 
 }
 .slider-track::-webkit-scrollbar { display: none; }
-.team-card { min-width: 280px; scroll-snap-align: center; cursor: default; } /* Примагничиваем по центру */
+.team-card { min-width: 280px; cursor: default; } /* УБРАЛИ scroll-snap-align */
 .slider-btn { background: var(--accent); color: white; border: none; border-radius: 50%; width: 50px; height: 50px; cursor: pointer; display: flex; justify-content: center; align-items: center; flex-shrink: 0; }
 .slider-btn:hover { background: var(--accent-hover); }
 .slider-pagination { display: flex; justify-content: center; gap: 10px; margin-top: 20px; }
