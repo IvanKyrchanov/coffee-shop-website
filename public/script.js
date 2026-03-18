@@ -105,11 +105,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const dot = document.createElement('div');
                 dot.className = `dot ${i === 0 ? 'active' : ''}`;
-                dot.onclick = () => document.getElementById('teamViewport').scrollTo({ left: i * (track.children[0].offsetWidth + 20), behavior: 'smooth' });
+                // НОВОЕ: меняем teamViewport на teamTrack
+                dot.onclick = () => document.getElementById('teamTrack').scrollTo({ left: i * (track.children[0].offsetWidth + 20), behavior: 'smooth' });
                 pag.appendChild(dot);
             });
 
-            const view = document.getElementById('teamViewport');
+            // НОВОЕ: меняем teamViewport на teamTrack
+            const view = document.getElementById('teamTrack');
             const step = () => track.children[0]?.offsetWidth + 20;
             document.getElementById('teamPrev').onclick = () => view.scrollBy({ left: -step(), behavior: 'smooth' });
             document.getElementById('teamNext').onclick = () => view.scrollBy({ left: step(), behavior: 'smooth' });

@@ -149,37 +149,25 @@ section { padding: 80px 10%; }
 .feature-item { flex: 1; min-width: 250px; text-align: center; }
 .feature-icon { font-size: 3rem; margin-bottom: 15px; }
 
-/* Слайдер Команды */
-.team { padding: 80px 5%; position: relative; }
-.slider-container { position: relative; max-width: 1200px; margin: 0 auto; display: flex; align-items: center; }
-.slider-viewport { overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
-.slider-viewport::-webkit-scrollbar { display: none; }
-.slider-track { display: flex; gap: 20px; }
-.team-card { scroll-snap-align: center; flex: 0 0 calc(25% - 15px); }
-
-.slider-btn {
-    background-color: var(--accent);
-    color: var(--white);
-    border: none;
-    width: 45px;
-    height: 45px;
-    border-radius: 50%;
-    cursor: pointer;
-    position: absolute;
-    z-index: 10;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-    transition: background 0.3s, transform 0.2s;
+/* --- 6. СЛАЙДЕР КОМАНДЫ --- */
+.slider-container { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; gap: 20px; }
+.slider-viewport { width: 100%; overflow: hidden; } /* Теперь это просто маска */
+.slider-track { 
+    display: flex; 
+    gap: 20px; 
+    padding: 20px 0; 
+    overflow-x: auto; /* Перенесли скролл сюда */
+    scroll-snap-type: x mandatory; /* Теперь магнит работает! */
+    scrollbar-width: none; 
+    -webkit-overflow-scrolling: touch; 
 }
-.slider-btn:hover { background-color: var(--accent-hover); transform: scale(1.1); }
-.prev-btn { left: -20px; }
-.next-btn { right: -20px; }
-
-.slider-pagination { display: flex; justify-content: center; gap: 12px; margin-top: 20px; }
-.dot { width: 12px; height: 12px; background-color: #ccc; border-radius: 50%; cursor: pointer; transition: 0.3s; }
-.dot.active { background-color: var(--accent); transform: scale(1.3); }
+.slider-track::-webkit-scrollbar { display: none; }
+.team-card { min-width: 280px; scroll-snap-align: center; cursor: default; } /* Примагничиваем по центру */
+.slider-btn { background: var(--accent); color: white; border: none; border-radius: 50%; width: 50px; height: 50px; cursor: pointer; display: flex; justify-content: center; align-items: center; flex-shrink: 0; }
+.slider-btn:hover { background: var(--accent-hover); }
+.slider-pagination { display: flex; justify-content: center; gap: 10px; margin-top: 20px; }
+.dot { width: 12px; height: 12px; border-radius: 50%; background: #ccc; cursor: pointer; transition: 0.3s; }
+.dot.active { background: var(--accent); transform: scale(1.3); }
 
 /* Галерея */
 .gallery-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
